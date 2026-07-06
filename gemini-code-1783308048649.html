@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy 18th Birthday, My Love</title>
+    <style>
+        /* --- Design System & Base Styles --- */
+        :root {
+            --bg-pastel: #fff5f5;
+            --text-main: #5a4b4b;
+            --accent-warm: #ffb3ba;
+            --accent-gold: #ffd166;
+            --candle-wax: #ffcad4;
+            --font-serif: 'Georgia', serif;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-pastel);
+            font-family: var(--font-sans);
+            color: var(--text-main);
+            position: relative;
+        }
+
+        /* --- Screen Architecture --- */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.2s ease-in-out, visibility 1.2s;
+            z-index: 10;
+        }
+
+        .screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* --- SCREEN 1: THE CAKE & CANDLE --- */
+        #screen1 {
+            background: radial-gradient(circle at center, #ffffff 0%, var(--bg-pastel) 100%);
+        }
+
+        .cake-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        /* Candle & Flame Architecture */
+        .candle-wrapper {
+            position: relative;
+            width: 12px;
+            height: 50px;
+            margin-bottom: -2px;
+            z-index: 2;
+        }
+
+        .wick {
+            position: absolute;
+            top: -8px;
+            left: 5px;
+            width: 2px;
+            height: 8px;
+            background-color: #443737;
+        }
+
+        .candle-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, var(--candle-wax), #ffe5ec);
+            border-radius: 4px 4px 2px 2px;
+            box-shadow: inset -3px 0 5px rgba(0,0,0,0.05);
+        }
+
+        .flame-container {
+            position: absolute;
+            top: -24px;
+            left: -4px;
+            width: 20px;
+            height: 24px;
+            opacity: 0;
+            transform: scale(0.5);
+            transform-origin: bottom center;
+            transition: opacity 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .flame-container.ignited {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .flame {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #ff4d4d 0%, #ff9900 40%, var(--accent-gold) 80%, #ffffff 100%);
+            border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+            animation: flicker 0.15s infinite alternate;
+            filter: drop-shadow(0 0 10px rgba(255,179,0,0.6));
+        }
+
+        .halo {
+            position: absolute;
+            top: -40px;
+            left: -40px;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,209,102,0.3) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            pointer-events: none;
+        }
+
+        .flame-container.ignited .halo {
+            opacity: 1;
+            animation: pulse-halo 2s infinite alternate;
+        }
+
+        /* Smoke effect */
+        .smoke {
+            position: absolute;
+            top: -15px;
+            left: 5px;
+            width: 2px;
+            height: 0;
+            background-color: rgba(150, 150, 150, 0.4);
+            filter: blur(1px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes smoke-rise {
+            0% { height: 0; opacity: 0.6; transform: translateX(0) scaleX(1); }
+            50% { transform: translateX(-4px) scaleX(1.5); opacity: 0.3; }
+            100% { height: 30px; transform: translateX(2px) scaleX(0.5); opacity: 0; }
+        }
+
+        /* Cake Minimalist Design */
+        .cake-body {
+            width: 140px;
+            height: 90px;
+            background: #fff0f3;
+            border-radius: 12px 12px 4px 4px;
+            box-shadow: 0 10px 25px rgba(90, 75, 75, 0.05);
+            position: relative;
+            border: 1px solid rgba(255, 179, 186, 0.3);
+        }
+
+        .cream-drip {
+            width: 100%;
+            height: 20px;
+            background-color: #ffffff;
+            border-radius: 12px 12px 8px 8px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .cake-plate {
+            width: 180px;
+            height: 8px;
+            background-color: #eae1e1;
+            border-radius: 4px;
+            margin-top: -2px;
+        }
+
+        .instruction-text {
+            margin-top: 35px;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #a39595;
+            font-weight: 400;
+            transition: opacity 0.5s ease;
+            text-align: center;
+        }
+
+        /* --- SCREEN 2: MAIN CELEBRATION --- */
+        #screen2 {
+            background-color: var(--bg-pastel);
+            justify-content: space-between;
+            padding: 40px 20px;
+            touch-action: none; /* Prevents default zooming on double tap */
+        }
+
+        /* Fairy Lights */
+        .fairy-lights {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 10px;
+            z-index: 20;
+            cursor: pointer;
+        }
+
+        .light-bulb {
+            width: 8px;
+            height: 12px;
+            background-color: #fff;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            transition: background-color 0.5s ease, box-shadow 0.5s ease;
+            transform-origin: top center;
+            animation: swing 3s ease-in-out infinite alternate;
+        }
+
+        .light-bulb:nth-child(odd) {
+            animation-duration: 2.5s;
+            animation-delay: 0.2s;
+        }
+
+        /* State management for lights */
+        .fairy-lights.on .light-bulb:nth-child(4n+1) { background-color: #ffb3ba; box-shadow: 0 0 10px #ffb3ba; animation: twinkle 1.5s infinite alternate; }
+        .fairy-lights.on .light-bulb:nth-child(4n+2) { background-color: #ffdfba; box-shadow: 0 0 10px #ffdfba; animation: twinkle 1.8s infinite alternate 0.3s; }
+        .fairy-lights.on .light-bulb:nth-child(4n+3) { background-color: #ffffba; box-shadow: 0 0 10px #ffffba; animation: twinkle 1.4s infinite alternate 0.1s; }
+        .fairy-lights.on .light-bulb:nth-child(4n+4) { background-color: #baffc9; box-shadow: 0 0 10px #baffc9; animation: twinkle 1.6s infinite alternate 0.5s; }
+
+        .fairy-lights.off .light-bulb {
+            background-color: rgba(200, 190, 190, 0.4);
+            box-shadow: none !important;
+            animation: none !important;
+        }
+
+        /* Typography */
+        .main-title {
+            font-family: var(--font-serif);
+            font-size: 1.6rem;
+            font-weight: 400;
+            line-height: 1.5;
+            text-align: center;
+            max-width: 280px;
+            margin: auto;
+            z-index: 15;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1s ease 0.5s;
+        }
+
+        #screen2:not(.hidden) .main-title {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Balloons Canvas */
+        .balloon-stage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 11;
+        }
+
+        .balloon {
+            position: absolute;
+            width: 50px;
+            height: 65px;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            cursor: pointer;
+            pointer-events: auto;
+            transform-origin: bottom center;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.05);
+        }
+
+        .balloon::after {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            left: 23px;
+            width: 4px;
+            height: 6px;
+            background-color: inherit;
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+        }
+
+        .balloon-string {
+            position: absolute;
+            bottom: -26px;
+            left: 24px;
+            width: 1px;
+            height: 20px;
+            background-color: rgba(90, 75, 75, 0.2);
+        }
+
+        /* Aesthetic Gift Box Button */
+        .gift-container {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 25;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .gift-container:active {
+            transform: scale(0.9);
+        }
+
+        .gift-box {
+            width: 45px;
+            height: 45px;
+            background-color: var(--accent-warm);
+            border-radius: 6px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(255, 179, 186, 0.4);
+        }
+
+        .gift-ribbon-v {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            width: 5px;
+            height: 100%;
+            background-color: #fff;
+        }
+
+        .gift-ribbon-h {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: #fff;
+        }
+
+        .gift-bow {
+            position: absolute;
+            top: -6px;
+            left: 14px;
+            width: 17px;
+            height: 8px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+        }
+
+        /* Handwritten Popup Modal */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(90, 75, 75, 0.2);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s;
+            padding: 20px;
+        }
+
+        .popup-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .letter-card {
+            background-color: #fffaf0;
+            width: 100%;
+            max-width: 320px;
+            padding: 30px 25px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(90, 75, 75, 0.1);
+            position: relative;
+            transform: translateY(30px);
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            border: 1px solid rgba(90, 75, 75, 0.05);
+        }
+
+        .popup-overlay.open .letter-card {
+            transform: translateY(0);
+        }
+
+        .letter-text {
+            font-family: var(--font-serif);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #4a3e3e;
+            text-align: justify;
+            font-style: italic;
+        }
+
+        .close-btn {
+            display: block;
+            margin: 25px auto 0 auto;
+            padding: 8px 24px;
+            background-color: transparent;
+            border: 1px solid #dcd1d1;
+            color: var(--text-main);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:active {
+            background-color: #f4eae1;
+        }
+
+        /* --- Global Interaction Mechanics --- */
+        /* Ripple Sparkle Component */
+        .sparkle-ripple {
+            position: absolute;
+            border: 1px solid rgba(255, 209, 102, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99;
+            transform: translate(-50%, -50%);
+            animation: ripple-out 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        /* Floating Hearts Component */
+        .floating-heart {
+            position: absolute;
+            color: rgba(255, 107, 107, 0.7);
+            font-size: 1.2rem;
+            pointer-events: none;
+            z-index: 50;
+            animation: heart-float 2s ease-out forwards;
+        }
+
+        /* Confetti Mini Particles */
+        .confetti-particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 60;
+            animation: confetti-shoot 0.6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        /* --- Core Animation Sets --- */
+        @keyframes flicker {
+            0% { transform: scaleX(0.96) rotate(-1deg); }
+            100% { transform: scaleX(1.04) rotate(1deg); }
+        }
+
+        @keyframes pulse-halo {
+            0% { transform: scale(0.95); opacity: 0.25; }
+            100% { transform: scale(1.05); opacity: 0.35; }
+        }
+
+        @keyframes swing {
+            0% { transform: rotate(-3deg); }
+            100% { transform: rotate(3deg); }
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.4; filter: brightness(0.8); }
+            100% { opacity: 1; filter: brightness(1.2); }
+        }
+
+        @keyframes ripple-out {
+            0% { width: 0; height: 0; opacity: 1; }
+            100% { width: 60px; height: 60px; opacity: 0; border-width: 2px; }
+        }
+
+        @keyframes heart-float {
+            0% { transform: translate(-50%, -50%) translateY(0) scale(0.7); opacity: 1; }
+            100% { transform: translate(-50%, -50%) translateY(-150px) translateX(var(--x-drift)) scale(1.2); opacity: 0; }
+        }
+
+        @keyframes confetti-shoot {
+            0% { transform: translate(-50%, -50%) translate(0, 0); opacity: 1; }
+            100% { transform: translate(-50%, -50%) translate(var(--tw-x), var(--tw-y)); opacity: 0; }
+        }
+
+        @keyframes balloon-drift {
+            0% { transform: translateY(110vh) rotate(0deg); }
+            100% { transform: translateY(-20vh) rotate(var(--rot)); }
+        }
+
+        @keyframes pop-shrink {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <section id="screen1" class="screen">
+        <div class="cake-container" id="cakeContainer">
+            <div class="candle-wrapper">
+                <div class="wick"></div>
+                <div class="flame-container" id="flameContainer">
+                    <div class="halo"></div>
+                    <div class="flame"></div>
+                </div>
+                <div class="smoke" id="candleSmoke"></div>
+                <div class="candle-body"></div>
+            </div>
+            <div class="cake-body">
+                <div class="cream-drip"></div>
+            </div>
+            <div class="cake-plate"></div>
+        </div>
+        <p class="instruction-text" id="instructionText">Tap the candle to light it</p>
+    </section>
+
+    <section id="screen2" class="screen hidden">
+        <div class="fairy-lights on" id="fairyLights" title="Tap to toggle lights">
+            <div class="light-bulb"></div><div class="light-bulb"></div>
+            <div class="light-bulb"></div><div class="light-bulb"></div>
+            <div class="light-bulb"></div><div class="light-bulb"></div>
+            <div class="light-bulb"></div><div class="light-bulb"></div>
+            <div class="light-bulb"></div><div class="light-bulb"></div>
+            <div class="light-bulb"></div><div class="light-bulb"></div>
+        </div>
+
+        <h1 class="main-title">Happy ATETEEN Birthday to the Love of My Life ❤️</h1>
+
+        <div class="balloon-stage" id="balloonStage"></div>
+
+        <div class="gift-container" id="giftContainer" title="Open Letter">
+            <div class="gift-box">
+                <div class="gift-ribbon-v"></div>
+                <div class="gift-ribbon-h"></div>
+                <div class="gift-bow"></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="letter-card">
+            <p class="letter-text">
+                "Happy Birthday to the most important person in my life. ❤️ It's hard to believe how quickly we've grown up. It feels like we were just 12-year-old kids, and somehow these last six years passed by without us even realizing it. Every moment with you has become a part of my happiest memories, and I truly hope we get to celebrate every birthday together in the years to come. Happy 'ATETEEN' Birthday, my love. I love you endlessly. 🤍"
+            </p>
+            <button class="close-btn" id="closePopupBtn">Return</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Elements Architecture ---
+            const cakeContainer = document.getElementById('cakeContainer');
+            const flameContainer = document.getElementById('flameContainer');
+            const candleSmoke = document.getElementById('candleSmoke');
+            const instructionText = document.getElementById('instructionText');
+            const screen1 = document.getElementById('screen1');
+            const screen2 = document.getElementById('screen2');
+            const fairyLights = document.getElementById('fairyLights');
+            const balloonStage = document.getElementById('balloonStage');
+            const giftContainer = document.getElementById('giftContainer');
+            const popupOverlay = document.getElementById('popupOverlay');
+            const closePopupBtn = document.getElementById('closePopupBtn');
+
+            let isIgnited = false;
+            let lastTap = 0;
+
+            // --- Screen 1: Ignition Sequence ---
+            cakeContainer.addEventListener('click', (e) => {
+                if (isIgnited) return;
+                isIgnited = true;
+
+                // Light Flame
+                flameContainer.classList.add('ignited');
+                instructionText.style.opacity = '0';
+
+                // Sequence Timing: 5 seconds burn -> fade -> smoke -> transition
+                setTimeout(() => {
+                    // Extinguish flame smoothly
+                    flameContainer.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                    flameContainer.classList.remove('ignited');
+
+                    // Trigger Smoke Asset
+                    setTimeout(() => {
+                        candleSmoke.style.animation = 'smoke-rise 1.2s ease-out forwards';
+                        
+                        // Screen Phase Transition
+                        setTimeout(() => {
+                            screen1.classList.add('hidden');
+                            screen2.classList.remove('hidden');
+                            initializeBalloons();
+                        }, 1000);
+
+                    }, 400);
+
+                }, 5000);
+            });
+
+            // --- Screen 2: Interaction Logic ---
+
+            // Background Interaction (Sparkle Ripples)
+            document.body.addEventListener('click', (e) => {
+                // Ensure clicks on actionable items don't misfire ripple placement parameters
+                if (e.target.closest('#cakeContainer') || e.target.closest('#fairyLights') || 
+                    e.target.closest('.balloon') || e.target.closest('#giftContainer') || 
+                    e.target.closest('.letter-card')) return;
+
+                createRipple(e.clientX, e.clientY);
+            });
+
+            // Support Double Tap for Floating Hearts Ecosystem
+            document.body.addEventListener('touchend', (e) => {
+                if (e.target.closest('#fairyLights') || e.target.closest('.balloon') || 
+                    e.target.closest('#giftContainer') || e.target.closest('.letter-card')) return;
+
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 300 && tapLength > 0) {
+                    const touch = e.changedTouches[0];
+                    spawnHeartShower(touch.clientX, touch.clientY);
+                    e.preventDefault();
+                }
+                lastTap = currentTime;
+            });
+
+            // Desktop Double-click fallback for accessibility mapping
+            document.body.addEventListener('dblclick', (e) => {
+                if (e.target.closest('#fairyLights') || e.target.closest('.balloon') || 
+                    e.target.closest('#giftContainer') || e.target.closest('.letter-card')) return;
+                spawnHeartShower(e.clientX, e.clientY);
+            });
+
+            // Toggle Fairy Lights Node
+            fairyLights.addEventListener('click', () => {
+                fairyLights.classList.toggle('on');
+                fairyLights.classList.toggle('off');
+            });
+
+            // --- Balloon Asset Engine ---
+            const pastelPalette = ['#ffb3ba', '#ffdfba', '#ffffba', '#baffc9', '#bae1ff', '#e8c4ff'];
+
+            function initializeBalloons() {
+                // Spawn a manageable stream of elegant, slow balloons
+                for (let i = 0; i < 9; i++) {
+                    setTimeout(() => {
+                        if(!screen2.classList.contains('hidden')) {
+                            createBalloon();
+                        }
+                    }, i * 600);
+                }
+            }
+
+            function createBalloon() {
+                const balloon = document.createElement('div');
+                balloon.className = 'balloon';
+                
+                // Styling allocations
+                const color = pastelPalette[Math.floor(Math.random() * pastelPalette.length)];
+                balloon.style.backgroundColor = color;
+                balloon.style.left = `${Math.random() * 80 + 5}%`;
+                
+                // Physics/Animation variation mapping
+                const speed = Math.random() * 6 + 10; // 10s to 16s cycle
+                const rotation = Math.random() * 20 - 10;
+                balloon.style.setProperty('--rot', `${rotation}deg`);
+                balloon.style.animation = `balloon-drift ${speed}s linear forwards`;
+
+                // Internal String Component
+                const string = document.createElement('div');
+                string.className = 'balloon-string';
+                balloon.appendChild(string);
+
+                // Pop Interactivity Event System
+                balloon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    popBalloon(balloon, e.clientX, e.clientY, color);
+                });
+
+                // Recycle architecture logic once out of viewport boundary parameters
+                balloon.addEventListener('animationend', () => {
+                    if (balloon.parentNode) {
+                        balloon.remove();
+                        if (!screen2.classList.contains('hidden')) createBalloon();
+                    }
+                });
+
+                balloonStage.appendChild(balloon);
+            }
+
+            function popBalloon(balloonEl, x, y, color) {
+                balloonEl.style.pointerEvents = 'none';
+                balloonEl.style.animation = 'pop-shrink 0.15s ease-out forwards';
+                
+                // Micro Burst Mechanics
+                createConfettiBurst(x, y, color);
+
+                setTimeout(() => {
+                    balloonEl.remove();
+                    // Refill ecosystem
+                    if (!screen2.classList.contains('hidden')) {
+                        setTimeout(createBalloon, 1000);
+                    }
+                }, 150);
+            }
+
+            // --- Particle Engine Components ---
+
+            function createRipple(x, y) {
+                const ripple = document.createElement('div');
+                ripple.className = 'sparkle-ripple';
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+                document.body.appendChild(ripple);
+                ripple.addEventListener('animationend', () => ripple.remove());
+            }
+
+            function createConfettiBurst(x, y, color) {
+                const particleCount = 12;
+                for (let i = 0; i < particleCount; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'confetti-particle';
+                    p.style.backgroundColor = color;
+                    p.style.left = `${x}px`;
+                    p.style.top = `${y}px`;
+
+                    // Generate dynamic vectors
+                    const angle = Math.random() * Math.PI * 2;
+                    const velocity = Math.random() * 40 + 20;
+                    const twX = Math.cos(angle) * velocity;
+                    const twY = Math.sin(angle) * velocity;
+
+                    p.style.setProperty('--tw-x', `${twX}px`);
+                    p.style.setProperty('--tw-y', `${twY}px`);
+
+                    document.body.appendChild(p);
+                    p.addEventListener('animationend', () => p.remove());
+                }
+            }
+
+            function spawnHeartShower(x, y) {
+                for (let i = 0; i < 6; i++) {
+                    setTimeout(() => {
+                        const heart = document.createElement('div');
+                        heart.className = 'floating-heart';
+                        heart.innerHTML = '❤️';
+                        // Spread spawn point subtly
+                        heart.style.left = `${x + (Math.random() * 40 - 20)}px`;
+                        heart.style.top = `${y + (Math.random() * 40 - 20)}px`;
+                        
+                        const drift = Math.random() * 60 - 30;
+                        heart.style.setProperty('--x-drift', `${drift}px`);
+
+                        document.body.appendChild(heart);
+                        heart.addEventListener('animationend', () => heart.remove());
+                    }, i * 100);
+                }
+            }
+
+            // --- Letter UI Systems Toggle ---
+            giftContainer.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popupOverlay.classList.add('open');
+            });
+
+            closePopupBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popupOverlay.classList.remove('open');
+            });
+
+            popupOverlay.addEventListener('click', (e) => {
+                if (e.target === popupOverlay) {
+                    popupOverlay.classList.remove('open');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
